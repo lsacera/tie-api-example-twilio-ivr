@@ -78,6 +78,11 @@ function handleTwilioMessages(sessionHandler) {
         console.error(error);
         console.log('No digits captured');
       }
+	    
+      //TEST: trying to get digits in another way.
+      digitsCaptured = req.body.Digits;
+      console.log('Digits Captured: ' + digitsCaptured);
+      //TEST end
 
       let callerCountry = '';
       if (post.CallerCountry) {
