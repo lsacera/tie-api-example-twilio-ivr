@@ -156,6 +156,11 @@ function sendTwilioMessage(teneoResponse, res) {
     language_STT = teneoResponse.output.parameters.twilio_sttLanguage;
     console.log("langauge_STT: " + language_STT);
   }
+	
+  if(teneoResponse.output.parameters.twilio_ttsLanguage) {
+    language_TTS = teneoResponse.output.parameters.twilio_ttsLanguage;
+    console.log("langauge_TTS: " + language_TTS);
+  }
 
   // If the output parameter 'twilio_endCall' exists, the call will be ended
   if (teneoResponse.output.parameters.twilio_endCall == 'true') {
