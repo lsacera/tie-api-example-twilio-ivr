@@ -72,6 +72,7 @@ function handleTwilioMessages(sessionHandler) {
       // check for Digits field
       let digitsCaptured = '';
       try {
+	console.log('Trying to get digits...');
         digitsCaptured = String(post.Digits);
       } catch (error) {
         // no need to do anything, but you could do this:
