@@ -48,6 +48,14 @@ app.use("/", router);
 // twilio message comes in
 router.post("/", handleTwilioMessages(sessionHandler));
 
+//test luis
+const urlencoded = require('body-parser').urlencoded;
+app.use(urlencoded({ extended: false }));
+//test luis
+
+
+
+
 // handle incoming twilio message
 function handleTwilioMessages(sessionHandler) {
   return (req, res) => {
@@ -72,8 +80,10 @@ function handleTwilioMessages(sessionHandler) {
       // check for Digits field
       let digitsCaptured = '';
       try {
-	console.log('Trying to get digits...');
         digitsCaptured = String(post.Digits);
+        if ((digitsCaptured === undefined) | (digitsCaptured == 'undefined')){ //no digits came in the request
+          digitsCaptured = ''; //blank to pass it to Teneo
+        }
       } catch (error) {
         // no need to do anything, but you could do this:
         console.error(error);
@@ -97,11 +107,9 @@ function handleTwilioMessages(sessionHandler) {
       console.log(`userInput: ${userInput}`);
       console.log(`confidence: ${confidence}`);
       console.log(`callerCountry: ${callerCountry}`);
+      console.log(`digitsCaptured: ${digitsCaptured}`);
 
       // send input to engine using stored sessionid and retreive response
-      // previous line
-      // const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio', 'digits': digitsCaptured, 'twilioConfidence' : confidence, 'twilioCallerCountry' : callerCountry});
-      // new line with the new parameter twiliosessionID
       const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio', 'digits': digitsCaptured, 'twilioConfidence' : confidence, 'twilioCallerCountry' : callerCountry, 'twilioSessionId' : callSid });
       console.log(`teneoResponse: ${teneoResponse.output.text}`)
 
@@ -119,7 +127,6 @@ function sendTwilioMessage(teneoResponse, res) {
 
   const twiml = new VoiceResponse();
   let response = null;
-
 
   // If the output parameter 'twilio_customVocabulary' exists, it will be used for custom vocabulary understanding.
   // This should be a string separated list of words to recognize
@@ -150,24 +157,35 @@ function sendTwilioMessage(teneoResponse, res) {
 
   if(teneoResponse.output.parameters.twilio_sttLanguage) {
     language_STT = teneoResponse.output.parameters.twilio_sttLanguage;
-    console.log("langauge_STT: " + language_STT);
+    console.log("language_STT: " + language_STT);
   }
 	
   if(teneoResponse.output.parameters.twilio_ttsLanguage) {
     language_TTS = teneoResponse.output.parameters.twilio_ttsLanguage;
-    console.log("langauge_TTS: " + language_TTS);
+    console.log("language_TTS: " + language_TTS);
   }
 
   // If the output parameter 'twilio_endCall' exists, the call will be ended
   if (teneoResponse.output.parameters.twilio_endCall == 'true') {
-
     twiml.say({
       voice: language_TTS
     },teneoResponse.output.text);
-
     response = twiml.hangup();
 
-  } else {
+  }
+  //if teneo engine request to get digits, then the connector will change the input to dtmf to get the digits.
+  else if (teneoResponse.output.parameters.twilio_getDigits == "true") {
+    console.log("twilio_getDigits: true");
+    response = twiml.gather({
+      input: 'dtmf',
+      actionOnEmptyResult:'true'
+    });
+    response.say({
+      voice:language_TTS
+    }, teneoResponse.output.text);
+  }
+  //in any other case, the response is created and delivered.
+  else {
     response = twiml.gather({
       language: language_STT,
       hints: customVocabulary,
@@ -185,7 +203,6 @@ function sendTwilioMessage(teneoResponse, res) {
   res.writeHead(200, { 'Content-Type': 'text/xml' });
   res.end(twiml.toString());
 }
-
 
 /***
  * SESSION HANDLER
