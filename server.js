@@ -170,8 +170,13 @@ function sendTwilioMessage(teneoResponse, res) {
     twiml.say({
       voice: language_TTS
     },teneoResponse.output.text);
+//TESTING: play music before hangup
+    console.log("detected hangup, trying to play file...");
+    response.play({
+    loop: 1}, 'https://api.twilio.com/cowbell.mp3');
+    console.log("... end playing file, trying to hangup");
+//TESTING: end
     response = twiml.hangup();
-
   }
   //if teneo engine request to get digits, then the connector will change the input to dtmf to get the digits.
   else if (teneoResponse.output.parameters.twilio_getDigits == "true") {
