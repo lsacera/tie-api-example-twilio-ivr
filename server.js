@@ -172,7 +172,7 @@ function sendTwilioMessage(teneoResponse, res) {
     },teneoResponse.output.text);
 //TESTING: play music before hangup
     console.log("detected hangup, trying to play file...");
-    response.play({
+    twiml.play({
     loop: 1}, 'https://api.twilio.com/cowbell.mp3');
     console.log("... end playing file, trying to hangup");
 //TESTING: end
