@@ -113,7 +113,7 @@ function handleTwilioMessages(sessionHandler) {
       console.log(`digitsCaptured: ${digitsCaptured}`);
 
       // send input to engine using stored sessionid and retreive response
-      const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio', 'digits': digitsCaptured, 'twilioConfidence' : confidence, 'twilioCallerCountry' : callerCountry, 'twilioSessionId' : callSid, 'twilioCaller' : caller });
+      const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio', 'digits': digitsCaptured, 'twilioConfidence' : confidence, 'twilioCallerCountry' : callerCountry, 'twilioSessionId' : callSid, 'phoneNumber' : caller });
       console.log(`teneoResponse: ${teneoResponse.output.text}`)
 
       // store engine sessionid for this caller
