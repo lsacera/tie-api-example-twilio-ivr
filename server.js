@@ -51,10 +51,6 @@ router.post("/", handleTwilioMessages(sessionHandler));
 //test luis
 const urlencoded = require('body-parser').urlencoded;
 app.use(urlencoded({ extended: false }));
-//test luis
-
-
-
 
 // handle incoming twilio message
 function handleTwilioMessages(sessionHandler) {
@@ -69,8 +65,13 @@ function handleTwilioMessages(sessionHandler) {
 
       // parse the body
       const post = qs.parse(body);
-      console.log("Post body parsed:");
-      console.log(post);
+      //log the parsed body. Removed as it is a little verbose
+      //console.log("Post body parsed:");
+      //console.log(post);
+	    
+      // get the caller phone number
+      const caller = post.Caller;
+      console.log(`Caller: ${caller}`);
 
       // get the caller id
       const callSid = post.CallSid;
@@ -112,7 +113,7 @@ function handleTwilioMessages(sessionHandler) {
       console.log(`digitsCaptured: ${digitsCaptured}`);
 
       // send input to engine using stored sessionid and retreive response
-      const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio', 'digits': digitsCaptured, 'twilioConfidence' : confidence, 'twilioCallerCountry' : callerCountry, 'twilioSessionId' : callSid });
+      const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio', 'digits': digitsCaptured, 'twilioConfidence' : confidence, 'twilioCallerCountry' : callerCountry, 'twilioSessionId' : callSid, 'twilioCaller' : caller });
       console.log(`teneoResponse: ${teneoResponse.output.text}`)
 
       // store engine sessionid for this caller
