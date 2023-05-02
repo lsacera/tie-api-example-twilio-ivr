@@ -69,6 +69,7 @@ function handleTwilioMessages(sessionHandler) {
 
       // parse the body
       const post = qs.parse(body);
+      console.log(`Post body parsed: ${post}`);
 
       // get the caller id
       const callSid = post.CallSid;
