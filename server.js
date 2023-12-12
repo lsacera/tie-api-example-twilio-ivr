@@ -181,6 +181,23 @@ function sendTwilioMessage(teneoResponse, res) {
 //TESTING: end
     response = twiml.hangup();
   }
+
+//TESTING Twilio Flex. The name of the queue
+  if (teneoResponse.output.parameters.twilio_Queue) {
+    var TQ = teneoResponse.output.parameters.twilio_Queue;
+    console.log("Queue name coming from Teneo: "+TQ);
+    console.log("Queue name set in connector: generalSupport (server.js, line 188)");
+    TQ = "generalSupport";
+    twiml.say({
+      voice: language_TTS
+    },teneoResponse.output.text);
+//now a redirect to the flow in flex studio (freak me)
+    twiml.redirect({
+      method: 'POST'
+      }, 'https://webhooks.twilio.com/v1/Accounts/AC1504989c727c8e40041c409f3dc8b202/Flows/FW1359526eb4e768e534b2238811e95f42?FlowEvent=return&QueueName='+TQ);  
+  } //end if queue parameter	  
+
+	  
   //if teneo engine request to get digits, then the connector will change the input to dtmf to get the digits.
   else if (teneoResponse.output.parameters.twilio_getDigits == "true") {
     console.log("twilio_getDigits: true");
