@@ -25,22 +25,25 @@ const {
   TENEO_ENGINE_URL,
   LANGUAGE_STT,
   LANGUAGE_TTS,
-  PORT
+  PORT, 
+  TWILIO_WORKFLOW_WEBHOOK_URL
 } = process.env;
 const port = PORT || 1337;
 const teneoApi = TIE.init(TENEO_ENGINE_URL);
+const twilio_workflow_webhook_url = TWILIO_WORKFLOW_WEBHOOK_URL;
 let language_STT = LANGUAGE_STT || 'en-US'; // See: https://www.twilio.com/docs/voice/twiml/gather#languagetags
 let language_TTS = LANGUAGE_TTS || 'Polly.Joanna'; // See: https://www.twilio.com/docs/voice/twiml/say/text-speech#amazon-polly
 
-console.log("LANGUAGE_STT: " + LANGUAGE_STT)
-console.log("LANGUAGE_TTS: " + LANGUAGE_TTS)
+console.log("LANGUAGE_STT: " + LANGUAGE_STT);
+console.log("LANGUAGE_TTS: " + LANGUAGE_TTS);
+console.log("TWILIO_WORKFLOW_WEBHOOK_URL: " + twilio_workflow_webhook_url);
 
 // initialise session handler, to store mapping between twillio CallSid and engine session id
 const sessionHandler = SessionHandler();
 
 // initialize an Express application
 const app = express();
-const router = express.Router()
+const router = express.Router();
 
 // Tell express to use this router with /api before.
 app.use("/", router);
@@ -48,7 +51,7 @@ app.use("/", router);
 // twilio message comes in
 router.post("/", handleTwilioMessages(sessionHandler));
 
-//test luis
+//test luis, I do not remember what is this for.
 const urlencoded = require('body-parser').urlencoded;
 app.use(urlencoded({ extended: false }));
 
@@ -182,19 +185,17 @@ function sendTwilioMessage(teneoResponse, res) {
     response = twiml.hangup();
   }
 
-//TESTING Twilio Flex. The name of the queue
+//Twilio Flex Contact Center, get the name of the Queue from Teneo
   if (teneoResponse.output.parameters.twilio_Queue) {
     var TQ = teneoResponse.output.parameters.twilio_Queue;
     console.log("Queue name coming from Teneo: "+TQ);
-    console.log("Queue name set in connector: generalSupport (server.js, line 188)");
-    TQ = "generalSupport";
     twiml.say({
       voice: language_TTS
     },teneoResponse.output.text);
-//now a redirect to the flow in flex studio (freak me)
+    //To pass the control back to the Twilio Workflow, we need a redirect with a mandatory variable "FlowEvent=return"
     twiml.redirect({
       method: 'POST'
-      }, 'https://webhooks.twilio.com/v1/Accounts/AC1504989c727c8e40041c409f3dc8b202/Flows/FW1359526eb4e768e534b2238811e95f42?FlowEvent=return&QueueName='+TQ);  
+      }, twilio_workflow_webhook_url+?FlowEvent=return&QueueName='+TQ);  
   } //end if queue parameter	  
 
 	  
