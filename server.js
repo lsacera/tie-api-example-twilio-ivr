@@ -195,7 +195,7 @@ function sendTwilioMessage(teneoResponse, res) {
     //To pass the control back to the Twilio Workflow, we need a redirect with a mandatory variable "FlowEvent=return"
     twiml.redirect({
       method: 'POST'
-      }, twilio_workflow_webhook_url+?FlowEvent=return&QueueName='+TQ);  
+      }, twilio_workflow_webhook_url+'?FlowEvent=return&QueueName='+TQ);  
   } //end if queue parameter	  
 
 	  
